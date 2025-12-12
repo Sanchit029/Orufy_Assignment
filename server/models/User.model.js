@@ -29,8 +29,6 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Create indexes
-userSchema.index({ email: 1 });
-userSchema.index({ phone: 1 });
+// Note: Indexes are automatically created by sparse: true on email and phone fields
 
 module.exports = mongoose.model('User', userSchema);
