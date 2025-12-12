@@ -1,0 +1,6 @@
+<!-- Products Icon - Shopping Bag Blue -->
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M20 6L10 20v47a6 6 0 0 0 6 6h48a6 6 0 0 0 6-6V20L60 6z" stroke="#071074" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="10" y1="20" x2="70" y2="20" stroke="#071074" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M53 33a13 13 0 0 1-26 0" stroke="#071074" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

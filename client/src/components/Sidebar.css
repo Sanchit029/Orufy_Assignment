@@ -1,0 +1,90 @@
+.sidebar {
+  width: 240px;
+  height: 100vh;
+  background-color: #1D222B;
+  color: white;
+  padding: 24px 0;
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  padding: 0 24px 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 20px;
+  color: white;
+}
+
+.sidebar-logo span {
+  font-size: 24px;
+}
+
+.sidebar-search {
+  padding: 0 24px 24px;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 10px 16px;
+  padding-left: 36px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+}
+
+.sidebar-search input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sidebar-search input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.sidebar-nav {
+  flex: 1;
+}
+
+.nav-item {
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.nav-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-left: 4px solid white;
+  padding-left: 20px;
+}
+
+.nav-item-icon {
+  font-size: 20px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+}

@@ -1,0 +1,7 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Person silhouette illustration -->
+  <circle cx="60" cy="35" r="18" fill="rgba(255, 255, 255, 0.2)"/>
+  <path d="M35 85 C35 65, 45 55, 60 55 C75 55, 85 65, 85 85 L85 105 L35 105 Z" fill="rgba(255, 255, 255, 0.2)"/>
+  <circle cx="60" cy="35" r="15" fill="rgba(255, 255, 255, 0.3)"/>
+  <path d="M38 85 C38 68, 47 58, 60 58 C73 58, 82 68, 82 85 L82 105 L38 105 Z" fill="rgba(255, 255, 255, 0.3)"/>
+</svg>
