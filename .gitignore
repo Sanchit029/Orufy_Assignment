@@ -43,3 +43,7 @@ coverage/
 
 # Misc
 *.pem
+
+# Uploads (user uploaded files)
+server/uploads/*
+!server/uploads/.gitkeep
