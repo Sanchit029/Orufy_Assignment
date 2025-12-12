@@ -4,11 +4,25 @@ import './ProductCard.css';
 const ProductCard = ({ product, onTogglePublish, onDelete, onEdit }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
-  const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5001';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    return imagePath.startsWith('http') ? imagePath : `${API_URL}${imagePath}`;
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    // If image is a string (old format), use it directly
+    if (typeof image === 'string') {
+      const url = image.startsWith('http') ? image : `${API_URL.replace('/api', '')}${image}`;
+      return url;
+    }
+    // If image is an object with fileId (new GridFS format)
+    if (image.fileId) {
+      return `${API_URL}/products/image/${image.fileId}`;
+    }
+    return null;
+  };
+
+  const handleImageError = (e) => {
+    console.error('Image failed to load:', product.images[currentImageIndex]);
+    console.error('Attempted URL:', e.target.src);
   };
 
   const handleEdit = () => {
@@ -38,6 +52,7 @@ const ProductCard = ({ product, onTogglePublish, onDelete, onEdit }) => {
               src={getImageUrl(product.images[currentImageIndex])}
               alt={product.name}
               className="product-image"
+              onError={handleImageError}
             />
             {product.images.length > 1 && (
               <>

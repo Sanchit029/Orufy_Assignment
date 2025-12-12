@@ -32,7 +32,12 @@ const productSchema = new mongoose.Schema({
     trim: true
   },
   images: [{
-    type: String
+    fileId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true
+    },
+    filename: String,
+    contentType: String
   }],
   exchangeEligibility: {
     type: String,

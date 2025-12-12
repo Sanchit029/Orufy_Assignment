@@ -9,6 +9,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth.routes');
 const productRoutes = require('./routes/product.routes');
 const { errorHandler } = require('./middleware/error.middleware');
+const { initGridFS } = require('./config/gridfs.config');
 
 const app = express();
 
@@ -19,7 +20,7 @@ app.use(helmet({
 }));
 app.use(morgan('dev'));
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : ['http://localhost:5173', 'http://localhost:5174'],
   credentials: true
 }));
 app.use(express.json());
@@ -48,8 +49,11 @@ mongoose.connect(process.env.MONGODB_URI, {
   .then(() => {
     console.log('✅ Connected to MongoDB');
     
+    // Initialize GridFS
+    initGridFS();
+    
     // Start server
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5001;
     app.listen(PORT, () => {
       console.log(`🚀 Server is running on port ${PORT}`);
       console.log(`📍 Environment: ${process.env.NODE_ENV}`);

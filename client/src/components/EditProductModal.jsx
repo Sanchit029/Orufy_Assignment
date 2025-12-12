@@ -18,11 +18,19 @@ const EditProductModal = ({ product, onClose, onSubmit }) => {
   const [errors, setErrors] = useState({});
 
   const productTypes = ['Foods', 'Electronics', 'Clothes', 'Beauty Products', 'Others'];
-  const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
-  const getImageUrl = (imagePath) => {
-    if (!imagePath) return null;
-    return imagePath.startsWith('http') ? imagePath : `${API_URL}${imagePath}`;
+  const getImageUrl = (image) => {
+    if (!image) return null;
+    // If image is a string (old format), use it directly
+    if (typeof image === 'string') {
+      return image.startsWith('http') ? image : `${API_URL.replace('/api', '')}${image}`;
+    }
+    // If image is an object with fileId (new GridFS format)
+    if (image.fileId) {
+      return `${API_URL}/products/image/${image.fileId}`;
+    }
+    return null;
   };
 
   const handleInputChange = (e) => {
@@ -84,10 +92,8 @@ const EditProductModal = ({ product, onClose, onSubmit }) => {
       submitData.append(key, formData[key]);
     });
     
-    // Add existing images
-    existingImages.forEach(image => {
-      submitData.append('existingImages', image);
-    });
+    // Add existing images as JSON string
+    submitData.append('existingImages', JSON.stringify(existingImages));
     
     // Add new images
     newImages.forEach(image => {

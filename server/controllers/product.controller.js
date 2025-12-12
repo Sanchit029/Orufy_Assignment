@@ -1,6 +1,5 @@
 const Product = require('../models/Product.model');
-const fs = require('fs');
-const path = require('path');
+const { uploadToGridFS, deleteFromGridFS } = require('../config/gridfs.config');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -68,10 +67,16 @@ exports.createProduct = async (req, res, next) => {
   try {
     const { name, productType, quantityStock, mrp, sellingPrice, brandName, exchangeEligibility } = req.body;
 
-    // Handle image uploads
+    // Handle image uploads to GridFS
     let images = [];
     if (req.files && req.files.length > 0) {
-      images = req.files.map(file => `/uploads/${file.filename}`);
+      const uploadPromises = req.files.map(file => uploadToGridFS(file));
+      const uploadResults = await Promise.all(uploadPromises);
+      images = uploadResults.map(result => ({
+        fileId: result.id,
+        filename: result.filename,
+        contentType: result.contentType
+      }));
     }
 
     const product = await Product.create({
@@ -92,14 +97,6 @@ exports.createProduct = async (req, res, next) => {
       data: product
     });
   } catch (error) {
-    // Delete uploaded files if product creation fails
-    if (req.files && req.files.length > 0) {
-      req.files.forEach(file => {
-        fs.unlink(file.path, err => {
-          if (err) console.error('Error deleting file:', err);
-        });
-      });
-    }
     next(error);
   }
 };
@@ -128,25 +125,40 @@ exports.updateProduct = async (req, res, next) => {
 
     const { name, productType, quantityStock, mrp, sellingPrice, brandName, exchangeEligibility, existingImages } = req.body;
 
-    // Handle new image uploads
+    // Handle existing images
     let images = [];
     if (existingImages) {
-      images = Array.isArray(existingImages) ? existingImages : [existingImages];
+      try {
+        images = typeof existingImages === 'string' ? JSON.parse(existingImages) : existingImages;
+        images = Array.isArray(images) ? images : [images];
+      } catch (e) {
+        images = [];
+      }
     }
     
+    // Handle new image uploads to GridFS
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map(file => `/uploads/${file.filename}`);
+      const uploadPromises = req.files.map(file => uploadToGridFS(file));
+      const uploadResults = await Promise.all(uploadPromises);
+      const newImages = uploadResults.map(result => ({
+        fileId: result.id,
+        filename: result.filename,
+        contentType: result.contentType
+      }));
       images = [...images, ...newImages];
     }
 
-    // Delete old images that are no longer used
-    const oldImages = product.images.filter(img => !images.includes(img));
-    oldImages.forEach(img => {
-      const filePath = path.join(__dirname, '..', img);
-      fs.unlink(filePath, err => {
-        if (err) console.error('Error deleting old image:', err);
-      });
-    });
+    // Delete old images from GridFS that are no longer used
+    const existingFileIds = images.map(img => img.fileId?.toString());
+    const oldImages = product.images.filter(img => !existingFileIds.includes(img.fileId?.toString()));
+    
+    for (const img of oldImages) {
+      try {
+        await deleteFromGridFS(img.fileId);
+      } catch (err) {
+        console.error('Error deleting old image from GridFS:', err);
+      }
+    }
 
     product = await Product.findByIdAndUpdate(
       req.params.id,
@@ -195,14 +207,15 @@ exports.deleteProduct = async (req, res, next) => {
       });
     }
 
-    // Delete associated images
+    // Delete associated images from GridFS
     if (product.images && product.images.length > 0) {
-      product.images.forEach(img => {
-        const filePath = path.join(__dirname, '..', img);
-        fs.unlink(filePath, err => {
-          if (err) console.error('Error deleting image:', err);
-        });
-      });
+      for (const img of product.images) {
+        try {
+          await deleteFromGridFS(img.fileId);
+        } catch (err) {
+          console.error('Error deleting image from GridFS:', err);
+        }
+      }
     }
 
     await Product.findByIdAndDelete(req.params.id);
