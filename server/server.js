@@ -25,16 +25,20 @@ const allowedOrigins = process.env.CLIENT_URL
   ? process.env.CLIENT_URL.split(',').map(url => url.trim())
   : ['http://localhost:5173', 'http://localhost:5174'];
 
+console.log('Allowed CORS origins:', allowedOrigins);
+
 app.use(cors({
   origin: function(origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      console.log('Blocked origin:', origin);
-      callback(new Error('Not allowed by CORS'));
+      console.log('⚠️  Blocked origin:', origin);
+      console.log('✓ Allowed origins:', allowedOrigins);
+      // Return false instead of error to avoid 500 status
+      callback(null, false);
     }
   },
   credentials: true,
