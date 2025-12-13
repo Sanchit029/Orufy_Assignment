@@ -52,7 +52,8 @@ exports.getAllProducts = async (req, res, next) => {
 exports.getProduct = async (req, res, next) => {
   try {
     const product = await Product.findById(req.params.id)
-      .populate('createdBy', 'email phone');
+      .populate('createdBy', 'email phone')
+      .lean();
 
     if (!product) {
       return res.status(404).json({
@@ -69,9 +70,24 @@ exports.getProduct = async (req, res, next) => {
       });
     }
 
+    // Sanitize images
+    const sanitizedProduct = {
+      ...product,
+      images: product.images.map(img => {
+        if (typeof img === 'string') {
+          return { fileId: null, filename: img, contentType: 'image/jpeg' };
+        }
+        return {
+          fileId: img.fileId ? img.fileId.toString() : null,
+          filename: img.filename,
+          contentType: img.contentType
+        };
+      })
+    };
+
     res.status(200).json({
       success: true,
-      data: product
+      data: sanitizedProduct
     });
   } catch (error) {
     next(error);
@@ -109,10 +125,21 @@ exports.createProduct = async (req, res, next) => {
       createdBy: req.user._id
     });
 
+    // Convert to plain object and sanitize
+    const productObj = product.toObject();
+    const sanitizedProduct = {
+      ...productObj,
+      images: productObj.images.map(img => ({
+        fileId: img.fileId ? img.fileId.toString() : null,
+        filename: img.filename,
+        contentType: img.contentType
+      }))
+    };
+
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
-      data: product
+      data: sanitizedProduct
     });
   } catch (error) {
     next(error);
@@ -190,13 +217,23 @@ exports.updateProduct = async (req, res, next) => {
         images,
         exchangeEligibility
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true, lean: true }
     );
+
+    // Sanitize images in response
+    const sanitizedProduct = {
+      ...product,
+      images: product.images.map(img => ({
+        fileId: img.fileId ? img.fileId.toString() : null,
+        filename: img.filename,
+        contentType: img.contentType
+      }))
+    };
 
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
-      data: product
+      data: sanitizedProduct
     });
   } catch (error) {
     next(error);
