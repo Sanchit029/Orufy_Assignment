@@ -63,7 +63,7 @@ const uploadToGridFS = async (file) => {
     uploadStream.on('error', reject);
     uploadStream.on('finish', () => {
       resolve({
-        id: uploadStream.id,
+        id: uploadStream.id.toString(), // Convert ObjectId to string
         filename: filename,
         contentType: file.mimetype
       });

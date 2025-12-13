@@ -1,5 +1,6 @@
 const Product = require('../models/Product.model');
 const { uploadToGridFS, deleteFromGridFS } = require('../config/gridfs.config');
+const mongoose = require('mongoose');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -73,7 +74,7 @@ exports.createProduct = async (req, res, next) => {
       const uploadPromises = req.files.map(file => uploadToGridFS(file));
       const uploadResults = await Promise.all(uploadPromises);
       images = uploadResults.map(result => ({
-        fileId: result.id,
+        fileId: new mongoose.Types.ObjectId(result.id),
         filename: result.filename,
         contentType: result.contentType
       }));
@@ -141,7 +142,7 @@ exports.updateProduct = async (req, res, next) => {
       const uploadPromises = req.files.map(file => uploadToGridFS(file));
       const uploadResults = await Promise.all(uploadPromises);
       const newImages = uploadResults.map(result => ({
-        fileId: result.id,
+        fileId: new mongoose.Types.ObjectId(result.id),
         filename: result.filename,
         contentType: result.contentType
       }));
