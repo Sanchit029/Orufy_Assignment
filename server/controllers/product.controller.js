@@ -17,12 +17,29 @@ exports.getAllProducts = async (req, res, next) => {
 
     const products = await Product.find(filter)
       .sort({ createdAt: -1 })
-      .populate('createdBy', 'email phone');
+      .populate('createdBy', 'email phone')
+      .lean(); // Convert to plain JS objects to avoid BSON issues
+
+    // Sanitize products to ensure proper serialization
+    const sanitizedProducts = products.map(product => ({
+      ...product,
+      images: product.images.map(img => {
+        // Handle both old string format and new GridFS format
+        if (typeof img === 'string') {
+          return { fileId: null, filename: img, contentType: 'image/jpeg' };
+        }
+        return {
+          fileId: img.fileId ? img.fileId.toString() : null,
+          filename: img.filename,
+          contentType: img.contentType
+        };
+      })
+    }));
 
     res.status(200).json({
       success: true,
-      count: products.length,
-      data: products
+      count: sanitizedProducts.length,
+      data: sanitizedProducts
     });
   } catch (error) {
     next(error);

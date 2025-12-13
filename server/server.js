@@ -28,24 +28,13 @@ const allowedOrigins = process.env.CLIENT_URL
 console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log('⚠️  Blocked origin:', origin);
-      console.log('✓ Allowed origins:', allowedOrigins);
-      // Return false instead of error to avoid 500 status
-      callback(null, false);
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  maxAge: 600 // Cache preflight for 10 minutes
+  optionsSuccessStatus: 200,
+  preflightContinue: false
 }));
 
 app.use(express.json());
@@ -71,6 +60,19 @@ app.use('/api/products', productRoutes);
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'Server is running' });
+});
+
+// Handle BSON serialization errors
+app.use((err, req, res, next) => {
+  if (err.message && err.message.includes('BSON')) {
+    console.error('BSON Error:', err.message);
+    return res.status(400).json({
+      success: false,
+      message: 'Data format error. Please try again.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+  next(err);
 });
 
 // Error handling middleware
