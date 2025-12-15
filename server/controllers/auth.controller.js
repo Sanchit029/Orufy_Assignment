@@ -48,13 +48,21 @@ exports.login = async (req, res, next) => {
     // In production, send OTP via SMS/Email service
     console.log(`\n🔐 OTP for ${emailOrPhone}: ${otp}\n`);
 
+    const responseData = {
+      userId: user._id,
+      contact: isEmail ? user.email : user.phone
+    };
+
+    // Include OTP in response when DEMO_MODE is enabled
+    if (process.env.DEMO_MODE === 'true') {
+      responseData.demoOtp = otp;
+      console.log('📱 DEMO MODE: OTP included in response');
+    }
+
     res.status(200).json({
       success: true,
       message: 'OTP sent successfully',
-      data: {
-        userId: user._id,
-        contact: isEmail ? user.email : user.phone
-      }
+      data: responseData
     });
   } catch (error) {
     next(error);
@@ -176,9 +184,18 @@ exports.resendOTP = async (req, res, next) => {
     // Log OTP (in production, send via SMS/Email)
     console.log(`\n🔐 New OTP for ${user.email || user.phone}: ${otp}\n`);
 
+    const responseData = {};
+    
+    // Include OTP in response when DEMO_MODE is enabled
+    if (process.env.DEMO_MODE === 'true') {
+      responseData.demoOtp = otp;
+      console.log('📱 DEMO MODE: OTP included in response');
+    }
+
     res.status(200).json({
       success: true,
-      message: 'OTP resent successfully'
+      message: 'OTP resent successfully',
+      ...(Object.keys(responseData).length > 0 && { data: responseData })
     });
   } catch (error) {
     next(error);

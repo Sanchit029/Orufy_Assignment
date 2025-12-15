@@ -19,6 +19,7 @@ const VerifyOTP = () => {
 
   const userId = location.state?.userId;
   const contact = location.state?.contact;
+  const demoOtp = location.state?.demoOtp;
 
   useEffect(() => {
     if (!userId) {
@@ -107,7 +108,9 @@ const VerifyOTP = () => {
       const response = await authService.resendOTP(userId);
       
       if (response.success) {
-        setSuccess('OTP sent successfully!');
+        setSuccess(response.data?.demoOtp 
+          ? `OTP sent successfully! Demo OTP: ${response.data.demoOtp}` 
+          : 'OTP sent successfully!');
         setResendTimer(20);
         setCanResend(false);
         setOtp(['', '', '', '', '', '']);
@@ -142,6 +145,20 @@ const VerifyOTP = () => {
           <h2>Login to your Productr Account</h2>
           
           <form onSubmit={handleSubmit} className="otp-form">
+            {demoOtp && (
+              <div className="demo-otp-banner" style={{
+                background: '#fff3cd',
+                border: '1px solid #ffc107',
+                borderRadius: '4px',
+                padding: '12px',
+                marginBottom: '16px',
+                textAlign: 'center',
+                color: '#856404'
+              }}>
+                <strong>🔓 Demo Mode:</strong> Your OTP is <strong style={{ fontSize: '18px', letterSpacing: '2px' }}>{demoOtp}</strong>
+              </div>
+            )}
+            
             <div className="form-group">
               <label>Enter OTP</label>
               <div className="otp-inputs">

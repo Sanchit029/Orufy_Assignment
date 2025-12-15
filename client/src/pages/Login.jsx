@@ -28,7 +28,8 @@ const Login = () => {
         navigate('/verify-otp', { 
           state: { 
             userId: response.data.userId, 
-            contact: response.data.contact 
+            contact: response.data.contact,
+            demoOtp: response.data.demoOtp // Pass OTP if in demo mode
           } 
         });
       }
